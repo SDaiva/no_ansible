@@ -1,0 +1,47 @@
+- name: "run apt update"
+  apt:
+    name: '*'
+    state: latest
+
+- hosts: docker
+- become: true
+  tasks:
+    name: install dependencies
+    apt:
+      name:
+        - apt-transport-https
+        - ca-certificates
+        -  curl
+        - gnupg-agent
+        - software-properties-common
+      state: latest
+      update_cache: yes
+- name: GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+- name: repository docker
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    state: present
+- name: install docker
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: latest
+    update_cache: yes
+- name: adding users to group docker
+  user:
+    name: '{{ team2_user }}'
+    groups: docker
+    append: yes
+  loop:
+    - user1
+    - user2
+- name: Install docker-compose
+  get_url:
+    url : https://github.com/SDaiva/Final_assignment_Team2
+    dest: /home
+    mode: '755'
